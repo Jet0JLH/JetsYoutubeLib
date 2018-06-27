@@ -101,6 +101,15 @@
         End Get
     End Property
     Public Sub update()
+        If My.Computer.Network.IsAvailable Then
+            If My.Computer.Network.Ping("www.googleapis.com") = False Then
+                Throw New System.Exception("www.googleapis.com is not available")
+                Exit Sub
+            End If
+        Else
+                Throw New System.Exception("No network available")
+            Exit Sub
+        End If
         Try
             Dim apiString As String = "https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=" & channelID & "&key=" & apiKey
             webReq = Net.WebRequest.Create(apiString)
