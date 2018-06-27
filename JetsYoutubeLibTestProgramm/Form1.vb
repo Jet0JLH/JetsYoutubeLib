@@ -8,6 +8,11 @@
             Label6.Text = channelInfo.channelViews
             Label7.Text = channelInfo.subscriberCount
             Label8.Text = channelInfo.videoCount
+            Label9.Text = channelInfo.country
+            Label10.Text = channelInfo.channelDescription
+            Label11.Text = channelInfo.channelName
+            Label16.Text = channelInfo.channelCreationDate.ToString
+            Label17.Text = channelInfo.hiddenSubscriberCount.ToString
         Else
             MsgBox("Please insert API Key and Channel ID first", MsgBoxStyle.Critical)
         End If
