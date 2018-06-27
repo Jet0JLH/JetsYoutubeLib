@@ -12,6 +12,14 @@
     Protected _lastUpdateTime As Date
     Protected webReq As Net.WebRequest
     Protected webStream As IO.Stream
+
+    Public Event subscriberCountChanged(ByRef sender As Object, ByVal oldValue As Integer, ByVal newValue As Integer)
+    Public Event channelViewsChanged(ByRef sender As Object, ByVal oldValue As Integer, ByVal newValue As Integer)
+    Public Event videoCountChanged(ByRef sender As Object, ByVal oldValue As Integer, ByVal newValue As Integer)
+    Public Event channelDescriptionChanged(ByRef sender As Object, ByVal oldValue As String, ByVal newValue As String)
+    Public Event hiddenSubscriberCountChanged(ByRef sender As Object, ByVal oldValue As Boolean, ByVal newValue As Boolean)
+    Public Event updated(ByRef sender As Object, ByVal lastUpdateTime As Date, ByVal newUpdateTime As Date)
+
     Public Sub New(ApiKey As String, ChannelID As String, Optional doFullUpdate As Boolean = False)
         Me.New
         Me.apiKey = ApiKey
@@ -101,18 +109,42 @@
             Dim content As String = objReader.ReadToEnd
             Dim jsonObj As Newtonsoft.Json.Linq.JObject = Newtonsoft.Json.Linq.JObject.Parse(content)
             With jsonObj.SelectToken("items").First.SelectToken("snippet")
+                Dim tempString As String = ""
                 _channelName = .Value(Of String)("title")
-                _channelDescription = .Value(Of String)("description")
+                tempString = .Value(Of String)("description")
+                If _channelDescription <> tempString Then
+                    RaiseEvent channelDescriptionChanged(Me, _channelDescription, tempString)
+                    _channelDescription = tempString
+                End If
                 _country = .Value(Of String)("country")
                 _channelCreationDate = Date.Parse(.Value(Of String)("publishedAt"))
             End With
             With jsonObj.SelectToken("items").First.SelectToken("statistics")
-                _channelViews = .Value(Of Integer)("viewCount")
-                _subscriberCount = .Value(Of Integer)("subscriberCount")
-                _videoCount = .Value(Of Integer)("videoCount")
-                _hiddenSubscriberCount = .Value(Of Boolean)("hiddenSubscriberCount")
+                Dim tempInt As Integer = 0
+                tempInt = .Value(Of Integer)("viewCount")
+                If _channelViews <> tempInt Then
+                    RaiseEvent channelViewsChanged(Me, channelViews, tempInt)
+                    _channelViews = tempInt
+                End If
+                tempInt = .Value(Of Integer)("subscriberCount")
+                If _subscriberCount <> tempInt Then
+                    RaiseEvent subscriberCountChanged(Me, _subscriberCount, tempInt)
+                    _subscriberCount = tempInt
+                End If
+                tempInt = .Value(Of Integer)("videoCount")
+                If _videoCount <> tempInt Then
+                    RaiseEvent videoCountChanged(Me, _videoCount, tempInt)
+                    _videoCount = tempInt
+                End If
+                Dim tempBool As Boolean = .Value(Of Boolean)("hiddenSubscriberCount")
+                If _hiddenSubscriberCount <> tempBool Then
+                    RaiseEvent hiddenSubscriberCountChanged(Me, _hiddenSubscriberCount, tempBool)
+                    _hiddenSubscriberCount = tempBool
+                End If
             End With
-            _lastUpdateTime = My.Computer.Clock.LocalTime
+            Dim tempNewTime As Date = My.Computer.Clock.LocalTime
+            RaiseEvent updated(Me, _lastUpdateTime, tempNewTime)
+            _lastUpdateTime = tempNewTime
         Catch ex As Exception
             MsgBox(ex.ToString)
         End Try
