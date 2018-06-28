@@ -126,7 +126,7 @@
                     _channelDescription = tempString
                 End If
                 _country = .Value(Of String)("country")
-                _channelCreationDate = Date.Parse(.Value(Of String)("publishedAt"))
+                _channelCreationDate = .Value(Of Date)("publishedAt")
             End With
             With jsonObj.SelectToken("items").First.SelectToken("statistics")
                 Dim tempInt As Integer = 0
